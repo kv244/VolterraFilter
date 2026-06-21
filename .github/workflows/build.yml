@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  windows:
+    name: Windows / MSVC Release
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # JUCE is not vendored — clone the exact version used in development.
+      - name: Clone JUCE 8.0.13
+        run: git clone --depth 1 --branch 8.0.13 https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure CMake
+        run: cmake -B build -S . -DJUCE_DIR=JUCE -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release -j4
+
+      # Upload the compiled VST3 bundle and standalone executable as build
+      # artefacts so they can be inspected or downloaded without running
+      # the full installer.
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: VolterraFilter-VST3-Windows
+          path: build/VolterraPlugin_artefacts/Release/VST3/
+
+      - name: Upload Standalone
+        uses: actions/upload-artifact@v4
+        with:
+          name: VolterraFilter-Standalone-Windows
+          path: "build/VolterraPlugin_artefacts/Release/Standalone/Volterra NL Filter.exe"

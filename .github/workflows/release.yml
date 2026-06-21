@@ -1,0 +1,64 @@
+name: Release
+
+# Runs on every push to main that passes.  Produces / updates the rolling
+# "latest" pre-release so users always have one download link that points
+# to the most recent successful build.
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    name: Build installer and publish release
+    runs-on: windows-latest
+
+    permissions:
+      contents: write   # needed to create/update releases and tags
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the forced tag push works
+
+      - name: Clone JUCE 8.0.13
+        run: git clone --depth 1 --branch 8.0.13 https://github.com/juce-framework/JUCE.git JUCE
+
+      - name: Configure CMake
+        run: cmake -B build -S . -DJUCE_DIR=JUCE -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release -j4
+
+      - name: Build NSIS installer
+        run: |
+          $env:Path += ";C:\Program Files (x86)\NSIS"
+          makensis installer.nsi
+        shell: pwsh
+
+      # Delete the old "latest" release and re-create it so the download
+      # link is always a single stable URL regardless of how many pushes
+      # have happened.
+      - name: Delete previous latest release (if any)
+        run: gh release delete latest --yes 2>$null; exit 0
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Move latest tag to current commit
+        run: |
+          git config user.email "github-actions@github.com"
+          git config user.name "github-actions"
+          git tag -fa latest -m "Latest build"
+          git push origin latest --force
+        shell: pwsh
+
+      - name: Publish release
+        run: |
+          gh release create latest `
+            --title "Latest Build" `
+            --notes "Automated build from ``${{ github.ref_name }}`` at commit ``${{ github.sha }}``." `
+            --prerelease `
+            "build\Volterra-NL-Filter-1.0.0-win64-Setup.exe"
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

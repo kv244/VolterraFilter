@@ -1,0 +1,30 @@
+# CMake build tree
+build/
+out/
+cmake-build-*/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.opendb
+
+# Compiled objects / debug info
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.dll
+*.exe
+!installer.nsi
+
+# JetBrains
+.idea/
+
+# macOS
+.DS_Store
+
+# JUCE generated (checked out separately in CI)
+JUCE/

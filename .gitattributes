@@ -1,0 +1,14 @@
+# Normalize line endings: store as LF, check out as native on Windows
+* text=auto
+
+# Force LF for files that must have Unix line endings (YAML, scripts)
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.sh   text eol=lf
+
+# Treat binary assets as binary — never mangle
+*.png  binary
+*.ico  binary
+*.exe  binary
+*.dll  binary
+*.vst3 binary

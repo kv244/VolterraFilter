@@ -1,0 +1,33 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  cppcheck:
+    name: cppcheck static analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cppcheck
+        run: sudo apt-get install -y cppcheck
+
+      # Analyse only the DSP/processor source files.
+      # JUCE and BinaryData headers are unavailable here; suppress those
+      # missing-include warnings so cppcheck still checks our own code.
+      - name: Run cppcheck
+        run: |
+          cppcheck \
+            --enable=warning,performance,portability \
+            --suppress=missingIncludeSystem \
+            --suppress=missingInclude \
+            --suppress=useStlAlgorithm \
+            --std=c++17 \
+            --error-exitcode=1 \
+            --quiet \
+            Source/PrunedVolterraFilter.h \
+            Source/VolterraPresets.h \
+            Source/PluginInit.cpp
