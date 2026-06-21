@@ -21,6 +21,7 @@ jobs:
       - name: Run cppcheck
         run: |
           cppcheck \
+            --language=c++ \
             --enable=warning,performance,portability \
             --suppress=missingIncludeSystem \
             --suppress=missingInclude \

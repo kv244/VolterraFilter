@@ -142,13 +142,12 @@ public:
     explicit VolterraEditor (VolterraProcessor& p)
         : AudioProcessorEditor (p),
           processor_ (p),
+          backgroundImage_ (juce::ImageCache::getFromMemory (
+              BinaryData::background_png, BinaryData::background_pngSize)),
           driveAttach_  (p.getAPVTS(), "drive",  driveKnob_),
           mixAttach_    (p.getAPVTS(), "mix",    mixKnob_),
           outputAttach_ (p.getAPVTS(), "output", outputKnob_)
     {
-        // Load the AI-generated background from the embedded binary data.
-        backgroundImage_ = juce::ImageCache::getFromMemory (
-            BinaryData::background_png, BinaryData::background_pngSize);
 
         setLookAndFeel (&lf_);
 
